@@ -39,7 +39,31 @@ app.use(express.urlencoded({ extended: true }));
 // helps us use the cookies from each request
 app.use(cookieParser());
 
+//allows us to use express session
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
+ 
+app.use(session({
+    secret: 'NotMyAge',
+    saveUninitialized: false, 
+    resave: false,
+    cookie : {
+        maxAge: 24*60*60*1000 //in milliseconds
+    }, 
+    store: new MongoStore({
+      mongooseConnection: mongoose.connection,
+      ttl: 24*60*60 //in seconds = 1day 
+    })
+}));
+
 // Routes middleware
 app.use('/', indexRouter);
 
+const authRoutes = require('./routes/auth.routes')
+app.use('/', authRoutes)
+
 module.exports = app;
+
+
+
+
